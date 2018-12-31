@@ -4,7 +4,7 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Classes/AIController.h"
-#include "PatrollingGuard.h"
+#include "PatrolComponent.h"
 
 
 EBTNodeResult::Type UPickNextWaypoint::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -17,11 +17,17 @@ EBTNodeResult::Type UPickNextWaypoint::ExecuteTask(UBehaviorTreeComponent& Owner
 
 	//Get the AIController to get the Pawn (character) and cast it to the PatrollingGuard class
 	AAIController *AIController = OwnerComp.GetAIOwner();
-	APatrollingGuard *PatrollingGuard = Cast<APatrollingGuard>(AIController->GetPawn());
-	if (!PatrollingGuard) { return EBTNodeResult::Aborted; }
+	APawn *Guard = AIController->GetPawn();
+	UPatrolComponent *PatrolComponent = Guard->FindComponentByClass<UPatrolComponent>();
+	if (!ensure(PatrolComponent)) { return EBTNodeResult::Aborted; }
 
 	//Get the array of patrol points and set the Waypoint to the current Index
-	TArray<AActor*> PatrolPoints = PatrollingGuard->PatrolPointsCPP;
+	TArray<AActor*> PatrolPoints = PatrolComponent->GetPatrolPoints();
+	if(PatrolPoints.Num() == 0) 
+	{ 
+		UE_LOG(LogTemp, Warning, TEXT("%s: Empty PatrolPoints array, make sure the instance of this guard has patrol points"), *Guard->GetName())
+		return EBTNodeResult::Aborted; 
+	}
 	BlackboardComp->SetValueAsObject(FName(WaypointKey.SelectedKeyName), PatrolPoints[Index]);
 
 	//Cycle the index
