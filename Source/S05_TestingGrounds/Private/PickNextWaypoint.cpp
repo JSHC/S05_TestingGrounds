@@ -15,10 +15,10 @@ EBTNodeResult::Type UPickNextWaypoint::ExecuteTask(UBehaviorTreeComponent& Owner
 	UBlackboardComponent *BlackboardComp = OwnerComp.GetBlackboardComponent();
 	int32 Index = BlackboardComp->GetValueAsInt(FName(IndexKey.SelectedKeyName));
 
-	//Get the AIController to get the Pawn (character) and cast it to the PatrollingGuard class
+	//Get the AIController to get the Pawn (guard character) 
 	AAIController *AIController = OwnerComp.GetAIOwner();
 	APawn *Guard = AIController->GetPawn();
-	UPatrolComponent *PatrolComponent = Guard->FindComponentByClass<UPatrolComponent>();
+	UPatrolComponent *PatrolComponent = Guard->FindComponentByClass<UPatrolComponent>(); //Get the Patrol component from the Guard 
 	if (!ensure(PatrolComponent)) { return EBTNodeResult::Aborted; }
 
 	//Get the array of patrol points and set the Waypoint to the current Index
